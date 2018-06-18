@@ -1,0 +1,7 @@
+# disable annoying metric cops
+Metrics/LineLength:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Style/ConditionalAssignment:
+  Enabled: false
