@@ -44,7 +44,7 @@ Dir["#{options[:folder]}/global_envs/*.json"].each do |item|
   # If the env doesn't exist, create it
   begin
     result = rest.get_rest("/environments/#{env_name}")
-  rescue StandardError
+  rescue HTTPServerException
     rest.post_rest("/environments/#{env_name}")
   end
 
