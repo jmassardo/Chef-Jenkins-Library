@@ -41,6 +41,13 @@ Dir["#{options[:folder]}/global_envs/*.json"].each do |item|
   bu_env = JSON.parse(File.read(item))
   env_name = File.basename(item, File.extname(item))
 
+  # If the env doesn't exist, create it
+  begin
+    result = rest.get_rest("/environments/#{env_name}")
+  rescue
+    rest.post_rest("/environments/#{env_name}")
+  end
+  
   result = rest.get_rest("/environments/#{env_name}")
   env = Chef::Mixin::DeepMerge.deep_merge(bu_env, result)
 
