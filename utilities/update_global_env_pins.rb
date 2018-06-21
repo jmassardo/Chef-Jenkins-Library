@@ -40,7 +40,7 @@ rest = Chef::ServerAPI.new(Chef::Config[:chef_server_url])
 Dir["#{options[:folder]}/global_envs/*.json"].each do |item|
   bu_env = JSON.parse(File.read(item))
   env_name = File.basename(item, File.extname(item))
-
+  puts "Processing the #{env_name} environment file."
   # If the env doesn't exist, create it
   begin
     result = rest.get_rest("/environments/#{env_name}")
