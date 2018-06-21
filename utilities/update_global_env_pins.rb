@@ -45,7 +45,7 @@ Dir["#{options[:folder]}/global_envs/*.json"].each do |item|
   begin
     result = rest.get_rest("/environments/#{env_name}")
   rescue Net::HTTPServerException => e
-    if e.response.code == "404"
+    if e.response.code == '404'
       puts "Attempting to create the #{env_name} environment"
       rest.post_rest("/environments/#{env_name}")
       result = rest.get_rest("/environments/#{env_name}")
