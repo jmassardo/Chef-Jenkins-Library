@@ -15,7 +15,7 @@ def call(){
       stage('Publish Environments to Production') {
         steps {
           input 'Publish Enviornments to Production Chef Server?'
-          sh 'chef exec ruby /var/lib/jenkins/chef_automation/update_global_env_pins.rb -k /var/lib/jenkins/chef_repo/.chef/knife.rb -f /var/lib/jenkins/chef_automation/global_envs/'
+          sh 'chef exec ruby /var/lib/jenkins/chef_automation/update_global_env_pins.rb -k /var/lib/jenkins/chef_repo/.chef/knife.rb -f /var/lib/jenkins/chef_automation'
         }
       }
     }
