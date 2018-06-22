@@ -2,11 +2,6 @@ def call(){
   pipeline {
     agent any
     stages {
-      stage("Show Diffs") {
-        steps {
-          getLastChanges()
-        }
-      }
       stage('Process Environment file(s)') {
         steps {
           sh 'chef exec ruby ~/chef_automation/generate_env_from_bu_json.rb -k ~/chef_repo/.chef/knife.rb'

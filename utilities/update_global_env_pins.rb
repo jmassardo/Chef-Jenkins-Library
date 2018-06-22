@@ -41,20 +41,22 @@ Dir["#{options[:folder]}/global_envs/*.json"].each do |item|
   bu_env = JSON.parse(File.read(item))
   env_name = File.basename(item, File.extname(item))
   puts "Processing the #{env_name} environment file."
-  # If the env doesn't exist, create it
-  begin
-    result = rest.get_rest("/environments/#{env_name}")
-  rescue Net::HTTPServerException => e
-    if e.response.code == '404'
-      puts "Attempting to create the #{env_name} environment"
-      rest.post_rest("/environments/#{env_name}")
-      result = rest.get_rest("/environments/#{env_name}")
-      puts "Successfully created the #{env_name} environment"
-    else
-      abort("failed to create the #{env_name} environment")
-    end
-  end
 
+  # # If the env doesn't exist, create it
+  # begin
+  #   result = rest.get_rest("/environments/#{env_name}")
+  # rescue Net::HTTPServerException => e
+  #   if e.response.code == '404'
+  #     puts "Attempting to create the #{env_name} environment"
+  #     rest.post_rest("/environments/#{env_name}", bu_env)
+  #     result = rest.get_rest("/environments/#{env_name}")
+  #     puts "Successfully created the #{env_name} environment"
+  #   else
+  #     abort("failed to create the #{env_name} environment")
+  #   end
+  # end
+
+  result = rest.get_rest("/environments/#{env_name}")
   env = Chef::Mixin::DeepMerge.deep_merge(bu_env, result)
 
   # Pull the env from the chef server again b/c
