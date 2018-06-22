@@ -30,7 +30,7 @@ def call(String projName){
       }
       stage('Smoke') {
         steps {
-          sh 'kitchen test'
+          sh '# kitchen test'
         }
       }
       stage('Stage files') {
