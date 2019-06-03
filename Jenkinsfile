@@ -20,6 +20,12 @@ pipeline {
             if [ ! -d "/var/lib/jenkins/chef_repo/.chef" ]; then
               mkdir -p /var/lib/jenkins/chef_repo/.chef
             fi
+            if [ ! -d "/var/lib/jenkins/chef_repo/cookbooks" ]; then
+              mkdir -p /var/lib/jenkins/chef_repo/cookbooks
+            fi
+            if [ ! -d "/var/lib/jenkins/chef_repo/environments" ]; then
+              mkdir -p /var/lib/jenkins/chef_repo/environments
+            fi
             if [ ! -f "/var/lib/jenkins/chef_repo/.chef/knife.rb" ]; then
               echo "WARNING"
               echo "We are creating empty files so the setup can proceed."
