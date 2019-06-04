@@ -57,26 +57,27 @@ def call(String projName, String[] groupNames){
           '''
         }
       }
-      groupNames.each {
-        stage('Approval') {
-          when {
-            // Only execute when on the master branch
-            expression { env.BRANCH_NAME == 'master' }
-          }
-          steps {
-            input 'Push ${proj_name} to the ${it} Policy Group?'
-          }
+      stage('Deployment') {
+        when {
+          // Only execute when on the master branch
+          expression { env.BRANCH_NAME == 'master' }
         }
-        stage('Upload') {
-          when {
-            // Only execute when on the master branch
-            expression { env.BRANCH_NAME == 'master' }
-          }
-          steps {
-            sh '''
-            cd ~/chef_repo/cookbooks/${proj_name}
-            chef push ${it}
-            '''
+        parallel {
+          groupNames.each {
+            stage('Approval') {
+              
+              steps {
+                input 'Push ${proj_name} to the ${it} Policy Group?'
+              }
+            }
+            stage('Upload') {
+              steps {
+                sh '''
+                cd ~/chef_repo/cookbooks/${proj_name}
+                chef push ${it}
+                '''
+              }
+            }
           }
         }
       }
