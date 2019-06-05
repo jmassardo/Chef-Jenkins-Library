@@ -14,9 +14,11 @@ This is a visual representation of how the various pieces interact:
 Perform these actions on the Jenkins Server.
 
 * Ensure Git is installed and updated
+
   ``` bash
   sudo yum -y install git
   ```
+
 * Ensure [ChefDK](https://downloads.chef.io/chefdk) is installed.
 
 > NOTE: This process has only been tested on a single Jenkins master. Additional steps may be needed if using Jenkins slaves.
@@ -24,32 +26,33 @@ Perform these actions on the Jenkins Server.
 ### Shared Library Installation
 
 Steps to install shared library in Jenkins:
+
 * [Fork this repository](https://www.github.com/jmassardo/Chef-Jenkins-Library/fork)
-* Browse to Jenkins configuration page `Home > Manage Jenkins > Configure System` (https://jenkins.domain.tld/configure)
+* Browse to Jenkins configuration page `Home > Manage Jenkins > Configure System` i.e. `https://jenkins.domain.tld/configure`
 * Name the library (i.e. chef_automation)
 * Select `Modern SCM` then `GitHub`
 * Click `Add`
 * Select `Credentials` then select the `Chef_Jenkins_Library` repository.
 
-> NOTE: You will need a Personal Access Token from GitHub. Make sure this is configured as a Username/Password Credential in Jenkins. If you are forking to an organziation, you may need to authorize the token for the org.
+> NOTE: You will need a Personal Access Token from GitHub. Make sure this is configured as a Username/Password Credential in Jenkins. If you are forking to an organization, you may need to authorize the token for the org.
 
 ![Global pipeline Library screenshot](./images/global_pipeline_libraries.png "Screenshot of Jenkins config page")
 
 ### Library Pipeline Setup
 
 * Create a pipeline in [Jenkins BlueOcean](https://jenkins.domain.tld/blue)
-* Select GitHub 
-* Select the appropriate organization 
+* Select GitHub
+* Select the appropriate organization
 * Select the repository (In this case, select Chef-Jenkins-Library.)
 * Click `Create Pipeline`
 
-> NOTE: You will need a Personal Access Token from GitHub. Make sure this is configured as a Username/Password Credential in Jenkins. If you are forking to an organziation, you may need to authorize the token for the org.
+> NOTE: You will need a Personal Access Token from GitHub. Make sure this is configured as a Username/Password Credential in Jenkins. If you are forking to an organization, you may need to authorize the token for the org.
 
 ## Usage
 
 ### Add/Modify/Remove Feature to Library
 
-All of the functions in the library are contained in their own file in the `/vars/` folder. In this library, we are essentially using these functions to hold our pipeline steps from a Jenkinsfile. To create new (or modify existing), it's better create a new repo with a standalone `Jenkinsfile` and do the testing there. This allows you to use the editor in Blue Ocean to build/modify the pipeline. Once it's functioning as expected, you can copy the steps into the `pipeline { }` section in `groovy` file as shown below. 
+All of the functions in the library are contained in their own file in the `/vars/` folder. In this library, we are essentially using these functions to hold our pipeline steps from a Jenkinsfile. To create new (or modify existing), it's better create a new repo with a standalone `Jenkinsfile` and do the testing there. This allows you to use the editor in Blue Ocean to build/modify the pipeline. Once it's functioning as expected, you can copy the steps into the `pipeline { }` section in `groovy` file as shown below.
 
 * Open (or create) `verbNoun.groovy` file
 * This is the format of the file:
@@ -90,6 +93,7 @@ myFunction 'my_var'
 ### Parse Global Environments
 
 The `parseGlobalEnvironments` function performs the following steps:
+
 * Stage Environment Files
 * Parse and update Environments on the Chef server
 
@@ -106,6 +110,7 @@ parseGlobalEnvironments()
 ### Promote Cookbook
 
 The `promoteCookbook` function performs the following steps:
+
 * Verify Stage
   * Lint (foodcritic)
   * Syntax (cookstyle)
@@ -125,9 +130,37 @@ promoteCookbook 'cookbook_name'
 
 > NOTE: Make sure the cookbook name specified matches the folder name of the actual cookbook otherwise this step will fail.
 
+### Promote Policyfile
+
+This function is based on the policyfile cookbook pattern outlined [here](http://blog.jerryaldrichiii.com/chef_infra/2019/05/28/using-policyfile-cookbooks.html). While this pattern isn't 100% pure policyfiles, it is a easy to consume stepping stone in that direction. It provides many of the benefits and eliminates a number of issues in the Berkshelf/Roles/Environments patterns. The pattern also has the benefit of allowing one to use one's existing Chef Infra Server without breaking the existing patterns in use.
+
+The `promotePolicyfile` function performs the following steps:
+
+* Verify Stage
+  * Lint (foodcritic)
+  * Syntax (cookstyle)
+  * Unit (chefspec)
+* Generate Lock File
+* Push policy to `dev` policy group
+* Wait for approval
+* Push policy to `stg` policy group
+* Wait for approval
+* Push policy to `prod` policy group
+
+Usage:
+
+``` groovy
+@Library('chef_automation') _
+
+promotePolicyfile 'cookbook_name'
+```
+
+> NOTE: Make sure the cookbook name specified matches the folder name of the actual cookbook otherwise this step will fail.
+
 ### Update Environment
 
 the `updateEnvironment` function performs the following steps:
+
 * Merges BU managed environment file with globally managed environment file
 * Validates that BU specified cookbooks/versions exist on Chef server
 * Compares merged environment file with environment on the Chef server and uploads merge file if changes are detected.
@@ -144,6 +177,7 @@ updateEnvironment()
 ### Upload Profile
 
 the `uploadProfile` function performs the following steps:
+
 * Performs an initial check on the profile `inspec check .`
 * Logs into Automate using the data_token
   > Set the following environment variables in Jenkins (Manage Jenkins > Manage Nodes > master > Configure > Environment Variables):
@@ -152,6 +186,7 @@ the `uploadProfile` function performs the following steps:
   > * AUTOMATE_ENTERPRISE="my_ent"
   > * DC_TOKEN="SuperLongAndSecretDataCollectorTokenThatShouldntBeShared..."
 * Uploads profile to Automate `inspec compliance upload . --overwrite`
+
 > NOTE: The `--overwrite` option doesn't do what one would think it does. Using this option allow Inspec to upload additional versions of the same profile.
 
 Usage:
@@ -165,15 +200,18 @@ uploadProfile()
 ## Utilities
 
 ### Create_data_bag_from_json
+
 This utility creates/modifies data bags from a BU specified folder. It uses the folder name as the name of the data bag, then creates the data bag items from each of the files within the folder.
 
 Example:
-```
+
+``` bash
 ruby create_data_bag_from_json.rb -f /path/to/my/folder -k /path/to/my/knife.rb
 ```
 
 Command line options:
-```
+
+``` bash
 Usage: create_data_bag_from_json.rb [options]
     -f, --folder /path/to/my/folder  Folder Name
     -k, --knife /path/to/my/knife.rb Knife Path
@@ -181,7 +219,8 @@ Usage: create_data_bag_from_json.rb [options]
 ```
 
 Example data bag folder structure:
-```
+
+``` bash
 data_bags
 ├── admin_users
 │   ├── admin1.json
@@ -198,32 +237,38 @@ data_bags
 ```
 
 ### Generate_env_from_bu_json
+
 This utility parses the bu provided environment files along with the corresponding global environment file then merges the cookbook, default attributes, and override attributes. It then verifies that all of the cookbooks and versions exist on the Chef server. Finally it uploads the environment file to the Chef server via the API.
 
 To change a default version pin, submit a PR to your `global_environments` repository with an update to the json file for the specific environment.
 
 Example:
-```
+
+``` bash
 ruby generate_env_from_bu_json.rb -k /path/to/my/knife.rb
 ```
 
 Command line options:
-```
+
+``` bash
 Usage: generate_env_from_bu_json.rb [options]
     -k, --knife /path/to/my/knife.rb Knife Path
     -h, --help                       Displays Help
 ```
 
 ### Update_global_env_pins
+
 This utility parses all the environment JSON files in the `global_envs` folder then compares them to the current environment configuration on the Chef Server. If it detects a delta, it updates the Chef Server with the newest version pins.
 
 Example:
-```
+
+``` bash
 ruby Update_global_env_pins.rb -f /path/to/my/folder -k /path/to/my/knife.rb
 ```
 
 Command line options:
-```
+
+``` bash
 Usage: Update_global_env_pins.rb [options]
     -f, --folder /path/to/my/folder  Folder Name
     -k, --knife /path/to/my/knife.rb Knife Path
