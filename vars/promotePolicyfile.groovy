@@ -1,4 +1,4 @@
-def call(String projName, String[] groupNames){
+def call(String projName){
   pipeline {
     agent any
     stages {
@@ -57,28 +57,58 @@ def call(String projName, String[] groupNames){
           '''
         }
       }
-      stage('Deployment') {
+      stage('Dev Deployment') {
         when {
           // Only execute when on the master branch
           expression { env.BRANCH_NAME == 'master' }
         }
-        parallel {
-          groupNames.each {
-            stage('Approval') {
-              
-              steps {
-                input 'Push ${proj_name} to the ${it} Policy Group?'
-              }
-            }
-            stage('Upload') {
-              steps {
-                sh '''
-                cd ~/chef_repo/cookbooks/${proj_name}
-                chef push ${it}
-                '''
-              }
-            }
-          }
+        steps {
+          sh '''
+          cd ~/chef_repo/cookbooks/${proj_name}
+          chef push dev
+          '''
+        }
+      }
+      stage('Approve Staging Deployment?') {
+        when {
+          // Only execute when on the master branch
+          expression { env.BRANCH_NAME == 'master' }
+        }
+        steps {
+          input 'Deploy ${proj_name} to Staging?'
+        }
+      }
+      stage('Staging Deployment') {
+        when {
+          // Only execute when on the master branch
+          expression { env.BRANCH_NAME == 'master' }
+        }
+        steps {
+          sh '''
+          cd ~/chef_repo/cookbooks/${proj_name}
+          chef push stg
+          '''
+        }
+      }
+      stage('Approve Prod Deployment?') {
+        when {
+          // Only execute when on the master branch
+          expression { env.BRANCH_NAME == 'master' }
+        }
+        steps {
+          input 'Deploy ${proj_name} to Prod?'
+        }
+      }
+      stage('Prod Deployment') {
+        when {
+          // Only execute when on the master branch
+          expression { env.BRANCH_NAME == 'master' }
+        }
+        steps {
+          sh '''
+          cd ~/chef_repo/cookbooks/${proj_name}
+          chef push prod
+          '''
         }
       }
       stage('Post-Cleanup') {
