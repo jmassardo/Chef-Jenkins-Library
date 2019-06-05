@@ -75,7 +75,7 @@ def call(String projName){
           expression { env.BRANCH_NAME == 'master' }
         }
         steps {
-          input 'Deploy ${proj_name} to Staging?'
+          input "Deploy ${proj_name} to Staging?"
         }
       }
       stage('Staging Deployment') {
@@ -96,7 +96,7 @@ def call(String projName){
           expression { env.BRANCH_NAME == 'master' }
         }
         steps {
-          input 'Deploy ${proj_name} to Prod?'
+          input "Deploy ${proj_name} to Prod?"
         }
       }
       stage('Prod Deployment') {
